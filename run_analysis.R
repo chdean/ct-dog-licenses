@@ -97,3 +97,9 @@ writeOGR(centroids,
          driver = 'GeoJSON',
          check_exists = FALSE)
 
+# write the state boundary to file
+writeOGR(connecticut,
+         'build/connecticut.geojson',
+         layer = 'connecticut',
+         driver = 'GeoJSON',
+         check_exists = FALSE)
