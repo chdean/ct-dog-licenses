@@ -1,6 +1,8 @@
 library(rgdal)
 library(rgeos)
 
+output.file <- 'build/licenses.geojson'
+
 dir.create('data', showWarnings = FALSE)
 setwd('data')
 
@@ -60,13 +62,15 @@ DownloadShapefile(places.shapefile)
 places <- readOGR(dsn = places.shapefile,
                   layer = places.shapefile)
 
-centroids <- gCentroid(places, byid = TRUE)
-centroids$TOWN <- toupper(places$NAME)
-
 # merge places with dataset
-towns.licensespercap <- merge(licensespercap,
-                              centroids,
+places$TOWN <- toupper(places$NAME)
+towns.licensespercap <- merge(places,
+                              licensespercap,
                               by = 'TOWN')
+
+centroids <- SpatialPointsDataFrame(gCentroid(towns.licensespercap, byid = TRUE),
+                                    towns.licensespercap@data, match.ID = FALSE)
+
 
 # state boundaries shapefile
 states.shapefile <- 'cb_2015_us_state_20m'
@@ -75,4 +79,21 @@ DownloadShapefile(states.shapefile)
 states <- readOGR(dsn = states.shapefile,
                   layer = states.shapefile)
 connecticut <- states[states$NAME == 'Connecticut', ]
+
+# write output to geojson file
+setwd('..')
+
+centroids@data <- centroids@data[, c('NAME', 'LICENSESPERCAP2014')]
+centroids <- centroids[complete.cases(centroids@data), ]
+
+# replace file if it already exists
+if (file.exists(output.file)) {
+  file.remove(output.file)
+}
+
+writeOGR(centroids,
+         output.file,
+         layer = 'licenses',
+         driver = 'GeoJSON',
+         check_exists = FALSE)
 
