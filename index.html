@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title>Dog Licenses Per Capita</title>
+    <style>
+path {
+  fill: none;
+  stroke: #000;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+
+}
+
+.land {
+  fill: #faf3e1;
+}
+
+.symbol {
+  fill: #4a62ae;
+  fill-opacity: .5;
+  stroke: #89b0dc;
+  stroke-opacity: .5;
+}
+
+.city {
+  fill: black;
+  stroke: none;
+}
+    </style>
+  </head>
+  <body>
+    <script src="//d3js.org/d3.v4.min.js" charset="utf-8"></script>
+    <!-- <h1>Dog Licenses Per Capita</h1> -->
+    <!-- <h2>Connecticut 2014</h2> -->
+    <div id="chart"></div>
+    <script>
+var width = 800,
+    height = 580;
+
+var svg = d3.select("#chart").append("svg")
+.attr("width", width)
+.attr("height", height);
+
+var radius = d3.scaleSqrt()
+  .domain([0, 1e6])
+  .range([0, 15]);
+
+d3.json("build/connecticut.geojson", function(error, ct) {
+  if (error) return console.error(error);
+
+  var path = d3.geoPath()
+    .projection(d3.geoTransverseMercator()
+        .rotate([74 + 30 / 60, -38 - 50 / 60])
+        .fitExtent([[20, 20], [width - 100, height - 100]], ct));
+
+  svg.append("path")
+    .datum(ct)
+    .attr("class", "land")
+    .attr("d", path);
+
+  d3.json("build/licenses.geojson", function(error, circles) {
+    if (error) return console.error(error);
+
+    svg.selectAll(".city")
+      .data(circles.features)
+      .enter().append("path")
+        .attr("class", "city")
+        .attr("d", path.pointRadius(1));
+
+    svg.selectAll(".symbol")
+      .data(circles.features.sort(function(a, b) {
+        return b.properties.LICENSESPERCAP2014
+          - a.properties.LICENSESPERCAP2014;
+      }))
+      .enter().append("path")
+        .attr("class", "symbol")
+        .attr("d", path.pointRadius(function(d) {
+          return radius(d.properties.LICENSESPERCAP2014) * 5000;
+        }));
+   
+  });
+});
+
+    </script>
+  </body>
+</html>
