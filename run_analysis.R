@@ -1,6 +1,7 @@
 library(rgdal)
 library(rgeos)
 
+dir.create('data', showWarnings = FALSE)
 setwd('data')
 
 DownloadData <- function(url, file) {
