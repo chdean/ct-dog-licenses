@@ -1,0 +1,46 @@
+#chart {
+  width: 90%;
+  margin: auto;
+}
+
+header {
+  text-align: center;
+}
+
+path {
+  fill: none;
+  stroke: #000;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+
+}
+
+.land {
+  fill: #faf3e1;
+}
+
+.symbol {
+  fill: #4a62ae;
+  fill-opacity: .5;
+  stroke: #89b0dc;
+  stroke-opacity: .5;
+}
+
+.city {
+  fill: black;
+  stroke: none;
+  fill-opacity: .8;
+}
+
+.legend circle {
+  fill: none;
+  stroke: #ccc;
+}
+
+.legend text {
+  fill: #777;
+  font: 10px sans-serif;
+  text-anchor: middle;
+}
+
+

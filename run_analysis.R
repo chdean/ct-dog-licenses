@@ -2,6 +2,7 @@ library(rgdal)
 library(rgeos)
 
 output.file <- 'build/licenses.geojson'
+ct.boundaries <- 'build/connecticut.geojson'
 
 dir.create('data', showWarnings = FALSE)
 setwd('data')
@@ -37,8 +38,9 @@ merged <- merge(x = licenses,
                 by = 'TOWN')
 
 merged$LICENSESPERCAP2014 <- merged$X2013.14 / merged$POPESTIMATE2014
+merged$LICENSESPERTHOUSAND2014 <- merged$LICENSESPERCAP2014 * 1000
 merged$TOTALLICENSESPERCAP <- merged$TOTALLICENSES / merged$POPESTIMATE2014
-licensespercap <- merged[, c('TOWN', 'LICENSESPERCAP2014')]
+licensespercap <- merged[, c('TOWN', 'LICENSESPERTHOUSAND2014')]
 
 DownloadShapefile <- function(shapefile) {
   zip.file <- paste0(shapefile, '.zip')
@@ -83,7 +85,7 @@ connecticut <- states[states$NAME == 'Connecticut', ]
 # write output to geojson file
 setwd('..')
 
-centroids@data <- centroids@data[, c('NAME', 'LICENSESPERCAP2014')]
+centroids@data <- centroids@data[, c('NAME', 'LICENSESPERTHOUSAND2014')]
 centroids <- centroids[complete.cases(centroids@data), ]
 
 # replace file if it already exists
@@ -98,8 +100,11 @@ writeOGR(centroids,
          check_exists = FALSE)
 
 # write the state boundary to file
-writeOGR(connecticut,
-         'build/connecticut.geojson',
-         layer = 'connecticut',
-         driver = 'GeoJSON',
-         check_exists = FALSE)
+
+if (!file.exists(ct.boundaries)) {
+  writeOGR(connecticut,
+           ct.boundaries,,
+           layer = 'connecticut',
+           driver = 'GeoJSON',
+           check_exists = FALSE)
+}
