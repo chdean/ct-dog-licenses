@@ -1,23 +1,29 @@
 var width, height;
-var margin = 100;
+var margin = 200;
 
 updateDimensions(window.innerWidth);
 
+// map and legend
 var svg = d3.select("#chart").append("svg")
 .attr("width", width)
 .attr("height", height);
 
+// tooltip
+var div = d3.select("#chart").append("div")
+  .attr("class", "tooltip")
+  .style("opacity", 0);
+
 var radius = d3.scaleSqrt()
   .domain([3.792, 2316])
-  .range([0, 150]);
+  .range([0, width / 7]);
 
 d3.json("build/connecticut.geojson", function(error, ct) {
   if (error) return console.error(error);
 
   var path = d3.geoPath()
     .projection(d3.geoTransverseMercator()
-        .rotate([74 + 30 / 60, -38 - 50 / 60])
-        .fitExtent([[margin / 2, margin / 2], 
+        .rotate([73.0877, 0])
+        .fitExtent([[margin / 2, 0], 
           [width - margin, height - margin]],
           ct));
 
@@ -44,17 +50,36 @@ d3.json("build/connecticut.geojson", function(error, ct) {
         .attr("class", "symbol")
         .attr("d", path.pointRadius(function(d) {
           return radius(d.properties.LICENSESPERTHOUSAND2014);
-        }));
+        }))
+        .on("mouseover", function(d) {
+          div.transition()
+            .duration(100)
+            .style("opacity", .9);
+          div
+            .html(d.properties.NAME + ": " + 
+                Math.round(d.properties.LICENSESPERTHOUSAND2014))
+            .style("left", (d3.event.pageX) + "px")
+            .style("top", (d3.event.pageY -28) + "px");
+        })
+        .on("mouseout", function(d) {
+          div.transition()
+            .duration(200)
+            .style("opacity", 0);
+        });
    
   });
 });
 
 var legend = svg.append("g")
     .attr("class", "legend")
-    .attr("transform", "translate(" + (width * .9) + "," + (height * .9) + ")")
+    .attr("transform", "translate(" + (width * .5) + "," + (height * .75) + ")")
   .selectAll("g")
     .data([100, 500, 1000])
   .enter().append("g");
+
+legend.append("text")
+  .text("New Licenses per Thousand People")
+  .attr("dy", "1.6em");
 
 legend.append("circle")
   .attr("cy", function(d) { return -radius(d); })
@@ -65,19 +90,8 @@ legend.append("text")
   .attr("dy", "1.3em")
   .text(d3.format(".1s"));
 
-legend.append("text")
-  .text("Licenses / Thousand People")
-  .attr("y", -3)
-  .attr("dy", "1.6em");
-
 function updateDimensions(winWidth) {
-  if (winWidth > 800) {
     width = winWidth * .9;
-    height = winWidth * .4;
-  } else {
-    width = winWidth;
-    height = winWidth;
-  }
-
+    height = winWidth * .75;
 }
 

@@ -1,10 +1,19 @@
 #chart {
-  width: 90%;
+  width: 95%;
   margin: auto;
 }
 
 header {
   text-align: center;
+}
+
+footer {
+  text-align: right;
+  width: 85%;
+  margin: auto;
+  color: #777;
+  font: 10px sans-serif;
+
 }
 
 path {
@@ -16,7 +25,7 @@ path {
 }
 
 .land {
-  fill: #faf3e1;
+  fill: #f9f6ed;
 }
 
 .symbol {
@@ -43,4 +52,11 @@ path {
   text-anchor: middle;
 }
 
-
+.tooltip {
+  position: absolute;
+  text-align: center;
+  padding: 2px;
+  text-shadow: 0 0 4px white;
+  pointer-events: none;
+  font: 12px sans-serif;
+}
