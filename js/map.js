@@ -1,7 +1,7 @@
 var width, height;
-var margin = 200;
+var margin = 50;
 
-updateDimensions(window.innerWidth);
+updateDimensions(window.innerWidth, window.innerHeight);
 
 // map and legend
 var svg = d3.select("#chart").append("svg")
@@ -15,7 +15,7 @@ var div = d3.select("#chart").append("div")
 
 var radius = d3.scaleSqrt()
   .domain([3.792, 2316])
-  .range([0, width / 7]);
+  .range([0, 120]);
 
 d3.json("build/connecticut.geojson", function(error, ct) {
   if (error) return console.error(error);
@@ -23,9 +23,9 @@ d3.json("build/connecticut.geojson", function(error, ct) {
   var path = d3.geoPath()
     .projection(d3.geoTransverseMercator()
         .rotate([73.0877, 0])
-        .fitExtent([[margin / 2, 0], 
-          [width - margin, height - margin]],
-          ct));
+        .fitExtent([[0, 20],
+                    [width - margin, height - margin]],
+                    ct));
 
   svg.append("path")
     .datum(ct)
@@ -66,19 +66,20 @@ d3.json("build/connecticut.geojson", function(error, ct) {
             .duration(200)
             .style("opacity", 0);
         });
-   
+
   });
 });
 
 var legend = svg.append("g")
     .attr("class", "legend")
-    .attr("transform", "translate(" + (width * .5) + "," + (height * .75) + ")")
+    .attr("transform", "translate(" + (width - 150) + "," + (height - 50) + ")")
   .selectAll("g")
     .data([100, 500, 1000])
   .enter().append("g");
 
 legend.append("text")
   .text("New Licenses per Thousand People")
+  .attr("id", "legend-title")
   .attr("dy", "1.6em");
 
 legend.append("circle")
@@ -90,8 +91,15 @@ legend.append("text")
   .attr("dy", "1.3em")
   .text(d3.format(".1s"));
 
-function updateDimensions(winWidth) {
+legend.append("text")
+  .attr("y", 25)
+  .attr("dy", "2em")
+  .attr("class", "source")
+  .text("Sources: US Census and the State of Connecticut");
+
+      
+function updateDimensions(winWidth, winHeight) {
     width = winWidth * .9;
-    height = winWidth * .75;
+    height = winHeight * .78;
 }
 

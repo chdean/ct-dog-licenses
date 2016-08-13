@@ -1,6 +1,10 @@
 #chart {
-  width: 95%;
+  width: 100%;
   margin: auto;
+}
+
+#graph {
+  width: 100%;
 }
 
 header {
@@ -9,7 +13,7 @@ header {
 
 footer {
   text-align: right;
-  width: 85%;
+  width: 100%;
   margin: auto;
   color: #777;
   font: 10px sans-serif;
@@ -26,6 +30,12 @@ path {
 
 .land {
   fill: #f9f6ed;
+}
+
+.roads {
+  stroke: black;
+  stroke-opacity: .5;
+  stroke-width: 2px;
 }
 
 .symbol {
@@ -50,6 +60,10 @@ path {
   fill: #777;
   font: 10px sans-serif;
   text-anchor: middle;
+}
+
+#legend-title text {
+  font: 14px sans-serif;
 }
 
 .tooltip {

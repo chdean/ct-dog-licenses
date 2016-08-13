@@ -3,6 +3,7 @@ library(rgeos)
 
 output.file <- 'build/licenses.geojson'
 ct.boundaries <- 'build/connecticut.geojson'
+ct.roads <- 'build/roads.geojson'
 
 dir.create('data', showWarnings = FALSE)
 setwd('data')
@@ -42,10 +43,8 @@ merged$LICENSESPERTHOUSAND2014 <- merged$LICENSESPERCAP2014 * 1000
 merged$TOTALLICENSESPERCAP <- merged$TOTALLICENSES / merged$POPESTIMATE2014
 licensespercap <- merged[, c('TOWN', 'LICENSESPERTHOUSAND2014')]
 
-DownloadShapefile <- function(shapefile) {
+DownloadShapefile <- function(shapefile, url) {
   zip.file <- paste0(shapefile, '.zip')
-  url <- paste0('http://www2.census.gov/geo/tiger/GENZ2015/shp/',
-                zip.file)
 
   if (!file.exists(zip.file)) {
     download.file(url, zip.file, method = 'curl')
@@ -57,10 +56,17 @@ DownloadShapefile <- function(shapefile) {
   }
 }
 
+DownloadShapefileCensus <- function(shapefile) {
+  url <- paste0('http://www2.census.gov/geo/tiger/GENZ2015/shp/',
+                shapefile,
+                '.zip')
+  DownloadShapefile(shapefile, url)
+}
+
 # populated places shapefile
 places.shapefile <- 'cb_2015_09_place_500k'
 
-DownloadShapefile(places.shapefile)
+DownloadShapefileCensus(places.shapefile)
 places <- readOGR(dsn = places.shapefile,
                   layer = places.shapefile)
 
@@ -77,10 +83,22 @@ centroids <- SpatialPointsDataFrame(gCentroid(towns.licensespercap, byid = TRUE)
 # state boundaries shapefile
 states.shapefile <- 'cb_2015_us_state_20m'
 
-DownloadShapefile(states.shapefile)
+DownloadShapefileCensus(states.shapefile)
 states <- readOGR(dsn = states.shapefile,
                   layer = states.shapefile)
 connecticut <- states[states$NAME == 'Connecticut', ]
+
+# major roads shapefile
+#roads.url <- 'http://magic.lib.uconn.edu/magic_2/vector/37800/majorroadct_37800_0000_1995_s250_ctdep_1_shp.zip'
+#roads.shapefile <- 'majorroadct_37800_0000_1995_s250_ctdep_1_shp'
+
+#DownloadShapefile(roads.shapefile, roads.url)
+#roads <- readOGR(dsn = paste0(roads.shapefile, 
+                              #'/', 
+                              #roads.shapefile,
+                              #'/NAD83'),
+                 #layer = paste0(roads.shapefile,
+                                #'_nad83_meters'))
 
 # write output to geojson file
 setwd('..')
@@ -99,12 +117,21 @@ writeOGR(centroids,
          driver = 'GeoJSON',
          check_exists = FALSE)
 
-# write the state boundary to file
+# write the state boundary to geojson
 
 if (!file.exists(ct.boundaries)) {
   writeOGR(connecticut,
-           ct.boundaries,,
+           ct.boundaries,
            layer = 'connecticut',
+           driver = 'GeoJSON',
+           check_exists = FALSE)
+}
+
+# write the roads to geojson
+if (!file.exists(ct.roads)) {
+  writeOGR(roads,
+           ct.roads,
+           layer = 'roads',
            driver = 'GeoJSON',
            check_exists = FALSE)
 }
